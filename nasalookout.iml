@@ -121,6 +121,7 @@
     <orderEntry type="library" exported="" name="Gradle: support-core-ui-27.0.2" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="Gradle: javawriter-2.1.1" level="project" />
     <orderEntry type="library" exported="" name="Gradle: support-annotations-27.0.2" level="project" />
+    <orderEntry type="library" exported="" name="Gradle: gson-2.8.1" level="project" />
     <orderEntry type="library" exported="" name="Gradle: support-media-compat-27.0.2" level="project" />
     <orderEntry type="library" exported="" name="Gradle: common-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="Gradle: common-1.0.3" level="project" />

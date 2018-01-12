@@ -1,6 +1,7 @@
 package com.elliecoding.nasalookout.screens;
 
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
@@ -9,13 +10,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.elliecoding.nasalookout.R;
+import com.elliecoding.nasalookout.entities.NasaData;
+import com.elliecoding.nasalookout.utils.JsonParser;
 
 public class ActivityMain extends AppCompatActivity {
 
@@ -37,7 +42,7 @@ public class ActivityMain extends AppCompatActivity {
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        downloadPics();
+        startInitialRequest();
     }
 
     private void initialiseFragments(Bundle savedInstanceState) {
@@ -65,20 +70,19 @@ public class ActivityMain extends AppCompatActivity {
         }
     }
 
-    private void downloadPics() {
+    private void startInitialRequest() {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://api.nasa.gov/planetary/apod?api_key=ht3oMoWKS6pKVaHJGFQ7IjrzkFnleJ0wTP4Hr1TQ";
 
         // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
 
-                    @Override
-                    public void onResponse(String response) {
-                        sendResponseToGallery(response);
-                    }
-                }, new Response.ErrorListener() {
+            @Override
+            public void onResponse(String response) {
+                startDetailedRequest(response);
+            }
+        }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -89,10 +93,31 @@ public class ActivityMain extends AppCompatActivity {
         queue.add(stringRequest);
     }
 
-    private void sendResponseToGallery(String response) {
+    private void startDetailedRequest(String response) {
+        NasaData data = JsonParser.parseResponse(response);
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = data.getUrl();
+
+        // Request a string response from the provided URL.
+        ImageRequest stringRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+
+            }
+        }, 1024, 1024, ImageView.ScaleType.CENTER, null, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.w(LOG_TAG, "Request failed, " + error.getMessage());
+            }
+        });
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest);
+    }
+
+    private void sendResponseToGallery(Bitmap image) {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_OVERVIEW);
         if (fragment != null && fragment instanceof FragmentOverview) {
-            ((FragmentOverview) fragment).displayImage(response);
+            ((FragmentOverview) fragment).displayImage(image);
         }
     }
 
@@ -100,18 +125,12 @@ public class ActivityMain extends AppCompatActivity {
         DrawerLayout mDrawerLayout = findViewById(R.id.drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
 
-            /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                getActionBar().setTitle("Closed");
             }
 
-            /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle("Open");
-                }
             }
         };
 
