@@ -2,12 +2,13 @@ package com.elliecoding.nasalookout.screens;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -18,6 +19,9 @@ import com.elliecoding.nasalookout.R;
 
 public class ActivityMain extends AppCompatActivity {
 
+    private static final String LOG_TAG = ActivityMain.class.getSimpleName();
+    private static final String TAG_OVERVIEW = "overview";
+
     private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
@@ -26,6 +30,7 @@ public class ActivityMain extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initialiseDrawer();
+        initialiseFragments(savedInstanceState);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -35,9 +40,32 @@ public class ActivityMain extends AppCompatActivity {
         downloadPics();
     }
 
-    private void downloadPics() {
-        final TextView mTextView = findViewById(R.id.text);
+    private void initialiseFragments(Bundle savedInstanceState) {
+        // Check that the activity is using the layout version with
+        // the fragment_container FrameLayout
+        if (findViewById(R.id.fragment_container) != null) {
 
+            // However, if we're being restored from a previous state,
+            // then we don't need to do anything and should return or else
+            // we could end up with overlapping fragments.
+            if (savedInstanceState != null) {
+                return;
+            }
+
+            // Create a new Fragment to be placed in the activity layout
+            FragmentOverview firstFragment = FragmentOverview.newInstance();
+
+            // In case this activity was started with special instructions from an
+            // Intent, pass the Intent's extras to the fragment as arguments
+            firstFragment.setArguments(getIntent().getExtras());
+
+            // Add the fragment to the 'fragment_container' FrameLayout
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, firstFragment, TAG_OVERVIEW).commit();
+        }
+    }
+
+    private void downloadPics() {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://api.nasa.gov/planetary/apod?api_key=ht3oMoWKS6pKVaHJGFQ7IjrzkFnleJ0wTP4Hr1TQ";
@@ -48,18 +76,24 @@ public class ActivityMain extends AppCompatActivity {
 
                     @Override
                     public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        mTextView.setText("Response is: " + response.substring(0, 500));
+                        sendResponseToGallery(response);
                     }
                 }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                mTextView.setText("That didn't work!");
+                Log.w(LOG_TAG, "Request failed, " + error.getMessage());
             }
         });
         // Add the request to the RequestQueue.
         queue.add(stringRequest);
+    }
+
+    private void sendResponseToGallery(String response) {
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_OVERVIEW);
+        if (fragment != null && fragment instanceof FragmentOverview) {
+            ((FragmentOverview) fragment).displayImage(response);
+        }
     }
 
     private void initialiseDrawer() {
