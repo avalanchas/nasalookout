@@ -7,6 +7,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,14 +22,21 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.elliecoding.nasalookout.R;
 import com.elliecoding.nasalookout.entities.NasaData;
+import com.elliecoding.nasalookout.logics.ContainerAdapter;
+import com.elliecoding.nasalookout.logics.FragmentCallable;
+import com.elliecoding.nasalookout.utils.DateHelper;
 import com.elliecoding.nasalookout.utils.JsonParser;
+import org.joda.time.LocalDate;
 
-public class ActivityMain extends AppCompatActivity {
+import java.util.List;
+
+public class ActivityMain extends AppCompatActivity implements FragmentCallable {
 
     private static final String LOG_TAG = ActivityMain.class.getSimpleName();
     private static final String TAG_OVERVIEW = "overview";
 
     private ActionBarDrawerToggle mDrawerToggle;
+    private boolean mRequestHd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +45,10 @@ public class ActivityMain extends AppCompatActivity {
 
         initialiseDrawer();
         initialiseFragments(savedInstanceState);
+        initialiseOverview();
+
+        // TODO SwipeRefreshLayout to check for new items?
+        // TODO settings
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -44,6 +57,32 @@ public class ActivityMain extends AppCompatActivity {
 
         startInitialRequest();
     }
+
+    private void initialiseOverview() {
+        RecyclerView blockGrid = findViewById(R.id.block_container);
+
+        // We know the layout will not change, supposed to increase performance
+        blockGrid.setHasFixedSize(true);
+
+        RecyclerView.LayoutManager manager = new GridLayoutManager(this, 2);
+        blockGrid.setLayoutManager(manager);
+        blockGrid.setAdapter(new ContainerAdapter());
+
+        // The adapter is currently empty, initialise the first couple of blocks
+        retrieveDataContainers();
+    }
+
+    private void retrieveDataContainers() {
+        for (LocalDate date : DateHelper.determineStartingDates(calculateNumberOfBlocks())) {
+
+        }
+    }
+
+    private int calculateNumberOfBlocks() {
+        // TODO check how many boxes we need to fill the screen according to screen size
+        return 6;
+    }
+
 
     private void initialiseFragments(Bundle savedInstanceState) {
         // Check that the activity is using the layout version with
@@ -102,7 +141,7 @@ public class ActivityMain extends AppCompatActivity {
         ImageRequest stringRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {
-
+                sendResponseToGallery(response);
             }
         }, 1024, 1024, ImageView.ScaleType.CENTER, null, new Response.ErrorListener() {
             @Override
@@ -159,5 +198,17 @@ public class ActivityMain extends AppCompatActivity {
         // TODO add search and favourite
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        // TODO when in detail go to overview, when in overview close app. When drawer open close drawer
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onFavouriteClicked(String id) {
+        // TODO use method
     }
 }

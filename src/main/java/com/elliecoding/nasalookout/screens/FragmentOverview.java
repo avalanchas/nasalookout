@@ -26,7 +26,7 @@ public class FragmentOverview extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         ViewGroup layout = (ViewGroup) inflater.inflate(R.layout.fragment_overview, container, false);
         holder = layout.findViewById(R.id.text);
-        image = layout.findViewById(R.id.image);
+        image = layout.findViewById(R.id.cover_image);
 
         return layout;
     }
