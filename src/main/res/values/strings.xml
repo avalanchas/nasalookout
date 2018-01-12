@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">NASA Lookout</string>
+    <string name="drawer_open">Open Menu</string>
+    <string name="drawer_close">Close Menu</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+</resources>
