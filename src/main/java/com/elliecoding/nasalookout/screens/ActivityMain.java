@@ -69,6 +69,9 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
 
     @Override
     public void onDataRetrieved(NasaData data) {
+        if (!mStorageDataManager.hasInStorage(data.getDate())) {
+            mStorageDataManager.writeToStorage(data);
+        }
        sendResponseToGallery(data);
     }
 

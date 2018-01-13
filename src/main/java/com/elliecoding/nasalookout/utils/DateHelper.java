@@ -36,7 +36,8 @@ public class DateHelper {
     public static List<LocalDate> determinePastStartingDates(int numberOfMonths, LocalDate sourceDate) {
         List<LocalDate> result = new ArrayList<>();
 
-        LocalDate date = sourceDate.minusDays(sourceDate.getDayOfMonth() + 1);
+        // Subtract one day less than the number of days we currently have -> first of month
+        LocalDate date = sourceDate.minusDays(sourceDate.getDayOfMonth() - 1);
         result.add(date);
         for (int count = 0; count < numberOfMonths - 1; count++) {
             date = date.minusMonths(1);

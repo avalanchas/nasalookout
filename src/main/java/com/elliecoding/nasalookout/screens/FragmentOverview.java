@@ -47,7 +47,6 @@ public class FragmentOverview extends Fragment {
         if (mPlaceholder.getVisibility() == View.VISIBLE) {
             mPlaceholder.setVisibility(View.GONE);
         }
-
         mAdapter.addItem(data);
     }
 }

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.elliecoding.nasalookout.entities.NasaData;
-import com.google.gson.Gson;
+import com.elliecoding.nasalookout.utils.JsonHelper;
 import org.joda.time.LocalDate;
 
 import java.io.*;
@@ -37,7 +37,7 @@ public class StorageDataManager {
      */
     public boolean hasInStorage(LocalDate date) {
         return new File(mContext.getFilesDir(), date.getYear() + "/" + date.getMonthOfYear() + "/" + date.getDayOfMonth
-                ()).exists();
+                () + ".json").exists();
     }
 
     public void requestFromStorage(LocalDate date) {
@@ -53,14 +53,16 @@ public class StorageDataManager {
         @Override
         protected NasaData doInBackground(LocalDate... dates) {
             String filename = getFilenameByDate(dates[0]);
+
             try (Reader reader = new FileReader(new File(mContext.getFilesDir(), filename))) {
-                return new Gson().fromJson(reader, NasaData.class);
+                return JsonHelper.streamDataFromJson(reader, NasaData.class);
             } catch (FileNotFoundException e) {
                 Log.d(LOG_TAG, "File for date " + dates[0] + " was not found", e);
+                return null;
             } catch (IOException e) {
                 Log.e(LOG_TAG, "IO Exception during file read", e);
+                return null;
             }
-            return null;
         }
 
         @Override
@@ -77,8 +79,12 @@ public class StorageDataManager {
             LocalDate date = data[0].getDate();
             String filename = getFilenameByDate(date);
 
+            if (!new File(mContext.getFilesDir(), filename).getParentFile().mkdirs()) {
+                Log.d(LOG_TAG, "File already existed or error");
+            }
+
             try (Writer writer = new FileWriter(new File(mContext.getFilesDir(), filename))) {
-                new Gson().toJson(data, writer);
+                JsonHelper.streamDataToJson(data[0], writer);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "IO Exception during file write", e);
             }

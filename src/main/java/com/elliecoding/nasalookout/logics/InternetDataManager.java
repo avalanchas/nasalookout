@@ -13,10 +13,8 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.elliecoding.nasalookout.entities.NasaData;
 import com.elliecoding.nasalookout.utils.AppConstants;
-import com.elliecoding.nasalookout.utils.JsonParser;
+import com.elliecoding.nasalookout.utils.JsonHelper;
 import org.joda.time.LocalDate;
-
-import java.util.HashMap;
 
 public class InternetDataManager {
 
@@ -47,7 +45,7 @@ public class InternetDataManager {
 
             @Override
             public void onResponse(String response) {
-                NasaData data = JsonParser.parseResponse(response);
+                NasaData data = JsonHelper.parseJsonToData(response);
                 startImageRequest(data);
             }
         }, new Response.ErrorListener() {

@@ -5,13 +5,17 @@ import android.support.annotation.NonNull;
 import com.google.gson.annotations.SerializedName;
 import org.joda.time.LocalDate;
 
+import java.io.Serializable;
+
 /**
  * Simple DTO for a nasa astronomy picture of the day. Holds all relevant information that was passed by the Nasa API.
  * Note that any data field may be empty or contain corrupt information
  *
  * @see <a href=https://api.nasa.gov/index.html>APOD API</a>
  */
-public class NasaData implements Comparable<LocalDate> {
+public class NasaData implements Comparable<NasaData>, Serializable {
+
+    private static final long serialVersionUID = 3915531850180120791L;
 
     private final String copyright;
     private final LocalDate date;
@@ -78,7 +82,7 @@ public class NasaData implements Comparable<LocalDate> {
     }
 
     @Override
-    public int compareTo(@NonNull LocalDate other) {
-        return date.compareTo(other);
+    public int compareTo(@NonNull NasaData other) {
+        return date.compareTo(other.getDate());
     }
 }
