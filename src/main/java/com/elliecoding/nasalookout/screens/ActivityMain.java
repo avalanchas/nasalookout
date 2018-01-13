@@ -1,7 +1,7 @@
 package com.elliecoding.nasalookout.screens;
 
+import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
@@ -11,7 +11,10 @@ import android.view.MenuItem;
 import android.view.View;
 import com.elliecoding.nasalookout.R;
 import com.elliecoding.nasalookout.entities.NasaData;
-import com.elliecoding.nasalookout.logics.*;
+import com.elliecoding.nasalookout.logics.DataEventListener;
+import com.elliecoding.nasalookout.logics.FragmentEventListener;
+import com.elliecoding.nasalookout.logics.InternetDataManager;
+import com.elliecoding.nasalookout.logics.StorageDataManager;
 import com.elliecoding.nasalookout.utils.DateHelper;
 import org.joda.time.LocalDate;
 
@@ -20,7 +23,7 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
     private static final String LOG_TAG = ActivityMain.class.getSimpleName();
 
     private static final String FRAGMENT_TAG_OVERVIEW = "overview";
-    private static final String FRAGMENT_TAG_DETAIL = "detail";
+    public static final String KEY_EXTRA_DATA = "extraData";
 
     // TODO make all resources screen flip safe
     private ActionBarDrawerToggle mDrawerToggle;
@@ -35,7 +38,7 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
         setContentView(R.layout.activity_main);
 
         initialiseDrawer();
-        initialiseFragments(savedInstanceState);
+        initialiseFragment(savedInstanceState);
         initialiseOverview();
 
         // TODO SwipeRefreshLayout to check for new items?
@@ -72,7 +75,7 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
         if (!mStorageDataManager.hasInStorage(data.getDate())) {
             mStorageDataManager.writeToStorage(data);
         }
-       sendResponseToGallery(data);
+        sendResponseToGallery(data);
     }
 
 
@@ -83,28 +86,18 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
         }
     }
 
-    private void initialiseFragments(Bundle savedInstanceState) {
-        // Check that the activity is using the layout version with
-        // the fragment_container FrameLayout
-        if (findViewById(R.id.fragment_container) != null) {
+    private void initialiseFragment(Bundle savedInstanceState) {
+        // TODO implement logic to decide device rotation, screen size etc. here so we can decide which fragment to use
+        if (findViewById(R.id.fragment_container_main) != null) {
 
-            // However, if we're being restored from a previous state,
-            // then we don't need to do anything and should return or else
-            // we could end up with overlapping fragments.
             if (savedInstanceState != null) {
                 return;
             }
 
-            // Create a new Fragment to be placed in the activity layout
-            FragmentOverview firstFragment = FragmentOverview.newInstance();
-
-            // In case this activity was started with special instructions from an
-            // Intent, pass the Intent's extras to the fragment as arguments
-            firstFragment.setArguments(getIntent().getExtras());
-
+            FragmentOverview overview = FragmentOverview.newInstance();
             // Add the fragment to the 'fragment_container' FrameLayout
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, firstFragment, FRAGMENT_TAG_OVERVIEW).commit();
+                    .add(R.id.fragment_container_main, overview, FRAGMENT_TAG_OVERVIEW).commit();
         }
     }
 
@@ -155,7 +148,8 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
     }
 
     @Override
-    public void onFavouriteClicked(String id) {
-        // TODO use method
+    public void onContainerClicked(NasaData data) {
+        Intent startIntent = new Intent()
+        startActivity();
     }
 }

@@ -1,5 +1,6 @@
 package com.elliecoding.nasalookout.screens;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,16 +14,45 @@ import android.widget.TextView;
 import com.elliecoding.nasalookout.R;
 import com.elliecoding.nasalookout.entities.NasaData;
 import com.elliecoding.nasalookout.logics.ContainerAdapter;
+import com.elliecoding.nasalookout.logics.ContainerClickListener;
+import com.elliecoding.nasalookout.logics.FragmentEventListener;
 
 public class FragmentOverview extends Fragment {
 
-    TextView mPlaceholder;
+    private TextView mPlaceholder;
+
+    private FragmentEventListener listener;
+    private boolean mHidden;
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        mHidden = hidden;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof FragmentEventListener) {
+            listener = (FragmentEventListener) context;
+        } else {
+            throw new IllegalStateException("A context that wishes to attach to this fragment must implement " +
+                    FragmentEventListener.class.getName());
+        }
+    }
+
 
     public static FragmentOverview newInstance() {
         return new FragmentOverview();
     }
 
-    private ContainerAdapter mAdapter = new ContainerAdapter();
+    private ContainerAdapter mAdapter = new ContainerAdapter(new ContainerClickListener() {
+        @Override
+        public void onContainerClicked(NasaData data) {
+            listener.onContainerClicked(data);
+        }
+    });
 
     @Nullable
     @Override

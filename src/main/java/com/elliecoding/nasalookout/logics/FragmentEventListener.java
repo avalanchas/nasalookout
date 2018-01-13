@@ -1,5 +1,7 @@
 package com.elliecoding.nasalookout.logics;
 
+import com.elliecoding.nasalookout.entities.NasaData;
+
 /**
  * Callback interface for {@link android.support.v4.app.Fragment} to {@link android.app.Activity} communication via
  * specific callback methods that any activity that wishes to attach to the respective fragment has to implement. Note:
@@ -7,5 +9,5 @@ package com.elliecoding.nasalookout.logics;
  */
 public interface FragmentEventListener {
 
-    void onFavouriteClicked(String id);
+    void onContainerClicked(NasaData data);
 }
