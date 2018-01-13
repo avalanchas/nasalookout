@@ -6,6 +6,7 @@
     <string name="about">About</string>
     <string name="alt_image">Nasa Image</string>
     <string name="placeholder_text">The most awesome images NASA has to offer will appear here shortly</string>
+    <string name="menu">Menu</string>
 
     <string name="january">January</string>
     <string name="february">February</string>
@@ -19,6 +20,7 @@
     <string name="october">October</string>
     <string name="november">November</string>
     <string name="december">December</string>
+    <string name="overview">Overview</string>
 
     <string-array name="months">
         <item>@string/january</item>

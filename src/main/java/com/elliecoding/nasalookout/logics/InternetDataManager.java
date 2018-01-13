@@ -35,7 +35,7 @@ public class InternetDataManager {
         }
     }
 
-    public void requestFromInternet(final LocalDate date) {
+    public void requestFromInternet(final LocalDate date, final boolean isCoverForMonth) {
         RequestQueue queue = Volley.newRequestQueue(mContext);
 
         // We can use "toString" here since NASA requests YYYY-MM-DD, which the date returns
@@ -46,7 +46,11 @@ public class InternetDataManager {
             @Override
             public void onResponse(String response) {
                 NasaData data = JsonHelper.parseJsonToData(response);
-                startImageRequest(data);
+                if (isCoverForMonth && data.getMediaType() == NasaData.MediaType.VIDEO) {
+                    requestFromInternet(date.plusDays(1), true);
+                } else {
+                    startImageRequest(data);
+                }
             }
         }, new Response.ErrorListener() {
 
@@ -67,7 +71,7 @@ public class InternetDataManager {
                 data.setImage(response);
                 notifyListener(data);
             }
-        }, NONE, NONE, ImageView.ScaleType.CENTER, null, new Response.ErrorListener() {
+        }, NONE, NONE, ImageView.ScaleType.CENTER_CROP, null, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.w(LOG_TAG, "Request failed, " + error.getMessage());

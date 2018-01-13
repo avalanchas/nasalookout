@@ -7,21 +7,21 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.elliecoding.nasalookout.R;
 import com.elliecoding.nasalookout.entities.NasaData;
-import com.elliecoding.nasalookout.logics.ContainerAdapter;
-import com.elliecoding.nasalookout.logics.ContainerClickListener;
-import com.elliecoding.nasalookout.logics.FragmentEventListener;
+import com.elliecoding.nasalookout.logics.*;
 
 public class FragmentOverview extends Fragment {
 
     private TextView mPlaceholder;
+    private RecyclerView mBlockGrid;
 
-    private FragmentEventListener listener;
+    private FragmentEventListener mListener;
     private boolean mHidden;
 
     @Override
@@ -35,7 +35,7 @@ public class FragmentOverview extends Fragment {
         super.onAttach(context);
 
         if (context instanceof FragmentEventListener) {
-            listener = (FragmentEventListener) context;
+            mListener = (FragmentEventListener) context;
         } else {
             throw new IllegalStateException("A context that wishes to attach to this fragment must implement " +
                     FragmentEventListener.class.getName());
@@ -47,12 +47,22 @@ public class FragmentOverview extends Fragment {
         return new FragmentOverview();
     }
 
-    private ContainerAdapter mAdapter = new ContainerAdapter(new ContainerClickListener() {
+    private ContainerAdapter mDayAdapter = new ContainerAdapterDays(new ContainerClickListener() {
         @Override
         public void onContainerClicked(NasaData data) {
-            listener.onContainerClicked(data.getDate());
+            mListener.onContainerClicked(data);
         }
     });
+
+    private ContainerAdapter mMonthAdapter = new ContainerAdapterMonths(new ContainerClickListener() {
+        @Override
+        public void onContainerClicked(NasaData data) {
+            mListener.onContainerClicked(data);
+        }
+    });
+
+    // The current adapter defaults to months, because that is what we need first
+    private ContainerAdapter mCurrentAdapter = mMonthAdapter;
 
     @Nullable
     @Override
@@ -60,15 +70,32 @@ public class FragmentOverview extends Fragment {
             savedInstanceState) {
         ViewGroup layout = (ViewGroup) inflater.inflate(R.layout.fragment_overview, container, false);
 
-        RecyclerView blockGrid = layout.findViewById(R.id.block_container);
+        mBlockGrid = layout.findViewById(R.id.block_container);
         mPlaceholder = layout.findViewById(R.id.placeholder);
 
+
         // We know the layout will not change, supposed to increase performance
-        blockGrid.setHasFixedSize(true);
+        mBlockGrid.setHasFixedSize(true);
+
+        // We need a trigger for when the user has scrolled all the way to the bottom
+        mBlockGrid.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (!recyclerView.canScrollVertically(ItemTouchHelper.DOWN)) {
+                    mListener.onMoreItemsRequired(mCurrentAdapter.getLastItem());
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
 
         RecyclerView.LayoutManager manager = new GridLayoutManager(getContext(), 2);
-        blockGrid.setLayoutManager(manager);
-        blockGrid.setAdapter(mAdapter);
+        mBlockGrid.setLayoutManager(manager);
+        mBlockGrid.setAdapter(mCurrentAdapter);
 
         return layout;
     }
@@ -77,14 +104,25 @@ public class FragmentOverview extends Fragment {
         if (mPlaceholder.getVisibility() == View.VISIBLE) {
             mPlaceholder.setVisibility(View.GONE);
         }
-        mAdapter.addItem(data);
+        mCurrentAdapter.addItem(data);
     }
 
     /**
      * Triggers this fragment to instructs its {@link android.support.v7.widget.RecyclerView.Adapter} to remove all
      * items currently visible on display
      */
-    public void removeAllItems() {
-        mAdapter.removeAll();
+    public void setToOverviewType(ActivityMain.ViewState viewState) {
+        mCurrentAdapter.removeAll();
+        mPlaceholder.setVisibility(View.VISIBLE);
+
+        switch (viewState) {
+            case MONTH:
+                mCurrentAdapter = mDayAdapter;
+                mBlockGrid.setAdapter(mCurrentAdapter);
+                break;
+            case YEAR:
+                mCurrentAdapter = mMonthAdapter;
+                mBlockGrid.setAdapter(mCurrentAdapter);
+        }
     }
 }

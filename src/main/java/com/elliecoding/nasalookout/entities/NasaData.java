@@ -22,17 +22,21 @@ public class NasaData implements Comparable<NasaData>, Serializable {
     private final String explanation;
     private final String url;
     private final String hdUrl;
-    private final MediaType mediaType;
-    private final String serviceVersion;
     private final String title;
 
-    private Bitmap image;
+    @SerializedName("service_version")
+    private final String serviceVersion;
+
+    @SerializedName("media_type")
+    private final MediaType mediaType;
+
+    private SerializedBitmap image;
 
     public enum MediaType {
         @SerializedName("image")
         IMAGE,
 
-        @SerializedName("")
+        @SerializedName("video")
         VIDEO;
     }
 
@@ -70,11 +74,11 @@ public class NasaData implements Comparable<NasaData>, Serializable {
     }
 
     public void setImage(Bitmap image) {
-        this.image = image;
+        this.image = new SerializedBitmap(image);
     }
 
     public Bitmap getImage() {
-        return image;
+        return image.getBitmap();
     }
 
     public LocalDate getDate() {

@@ -1,6 +1,5 @@
 package com.elliecoding.nasalookout.screens;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,34 +7,42 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import com.elliecoding.nasalookout.R;
 import com.elliecoding.nasalookout.entities.NasaData;
-import com.elliecoding.nasalookout.logics.FragmentEventListener;
 
 public class FragmentDetail extends Fragment {
 
-    private FragmentEventListener listener;
     private NasaData data;
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        if (context instanceof FragmentEventListener) {
-            listener = (FragmentEventListener) context;
-        } else {
-            throw new IllegalStateException("A context that wishes to attach to this fragment must implement " +
-                    FragmentEventListener.class.getName());
-        }
-    }
+    private ImageView image;
+    private TextView text;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle
             savedInstanceState) {
         ViewGroup layout = (ViewGroup) inflater.inflate(R.layout.fragment_detail, container, false);
-
+        image = layout.findViewById(R.id.full_image);
+        image.setImageBitmap(data.getImage());
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleFullText();
+            }
+        });
+        text = layout.findViewById(R.id.full_text);
+        text.setVisibility(View.GONE);
+        text.setText(data.getExplanation());
         return layout;
+    }
+
+    private void toggleFullText() {
+        if (text.getVisibility() == View.GONE) {
+            text.setVisibility(View.VISIBLE);
+        } else {
+            text.setVisibility(View.GONE);
+        }
     }
 
     /**

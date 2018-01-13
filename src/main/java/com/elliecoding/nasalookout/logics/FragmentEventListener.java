@@ -1,7 +1,6 @@
 package com.elliecoding.nasalookout.logics;
 
 import com.elliecoding.nasalookout.entities.NasaData;
-import org.joda.time.LocalDate;
 
 /**
  * Callback interface for {@link android.support.v4.app.Fragment} to {@link android.app.Activity} communication via
@@ -15,9 +14,9 @@ public interface FragmentEventListener {
      * Invoked whenever an overview container for a specific month is clicked. The app should then continue on to
      * show ALL the items for that month once this callback is invoked
      *
-     * @param date The date of the first day of the month of the container that was clicked
+     * @param data The data of the container that was clicked
      */
-    void onContainerClicked(LocalDate date);
+    void onContainerClicked(NasaData data);
 
     /**
      * Invoked whenever a specific item of a month was clicked. The app should then show this item in full size to
@@ -27,4 +26,10 @@ public interface FragmentEventListener {
      */
     void onNasaItemClicked(NasaData data);
 
+    /**
+     * Invoked when the recycler view of any grid showing on a fragment cannot scroll further down
+     *
+     * @param lastItem The last item that is managed and after which more items are required
+     */
+    void onMoreItemsRequired(NasaData lastItem);
 }

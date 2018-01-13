@@ -1,8 +1,6 @@
 package com.elliecoding.nasalookout.logics;
 
-import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,14 +17,12 @@ import java.util.List;
  * List adapter for containers that represent the overview of a month of data. Works with {@link NasaData} to provide
  * a preview of the clickable container
  */
-public class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.ViewHolder> {
+public abstract class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.ViewHolder> {
 
     private final List<NasaData> values = new ArrayList<>();
 
-    private final ContainerClickListener mListener;
-
-    public ContainerAdapter(ContainerClickListener listener) {
-        mListener = listener;
+    protected List<NasaData> getValues() {
+        return values;
     }
 
     /**
@@ -39,25 +35,42 @@ public class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.View
         notifyItemRangeRemoved(0, size);
     }
 
-    protected class ViewHolder extends RecyclerView.ViewHolder {
-        private View mlayout;
+    /**
+     * Retrieves the last item currently stored/managed by this adapter. Note that this is <b>not</b> the item that
+     * was <b>added</b> last, but the item that is the last one in the list according to the current sorting principles
+     *
+     * @return The last item by current sorting, never null
+     */
+    public NasaData getLastItem() {
+        return values.get(values.size() - 1);
+    }
 
-        private ImageView mCoverImage;
-        private TextView mCoverText;
-        private ViewGroup mContainer;
+    protected class ViewHolder extends RecyclerView.ViewHolder {
+        protected View mLayout;
+
+        protected ImageView mCoverImage;
+        protected TextView mCoverText;
+        protected ViewGroup mContainer;
 
         protected ViewHolder(View layout) {
             super(layout);
-            mlayout = layout;
+            mLayout = layout;
 
-            mContainer = mlayout.findViewById(R.id.container_layout);
-            mCoverImage = mlayout.findViewById(R.id.cover_image);
-            mCoverText = mlayout.findViewById(R.id.cover_text);
+            mContainer = mLayout.findViewById(R.id.container_layout);
+            mCoverImage = mLayout.findViewById(R.id.cover_image);
+            mCoverText = mLayout.findViewById(R.id.cover_text);
         }
     }
 
+    /**
+     * Adds several items to this adapter at once. The items will be sorted according to the current sorting
+     * principles (currently: oldest date last) after all items have been added
+     *
+     * @param items A list of items to add to this adapter to manage
+     */
     public void addItems(List<NasaData> items) {
         values.addAll(items);
+        Collections.sort(values, Collections.<NasaData>reverseOrder());
         notifyDataSetChanged();
     }
 
@@ -79,34 +92,6 @@ public class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.View
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View layout = inflater.inflate(R.layout.block_cover, parent, false);
         return new ViewHolder(layout);
-    }
-
-    @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
-        final NasaData data = values.get(position);
-
-        String month = holder.mlayout.getResources().getStringArray(R.array.months)[data.getDate()
-                .getMonthOfYear() - 1];
-        String text = month + " " + data.getDate().getYear();
-        holder.mCoverText.setText(text);
-        holder.mCoverImage.setImageBitmap(data.getImage());
-        holder.mContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mListener != null) {
-                    mListener.onContainerClicked(data);
-                }
-            }
-        });
-    }
-
-    private Resources getResources(ViewHolder holder) {
-        return holder.mlayout.getResources();
-    }
-
-    private void openContainer(int position, View view) {
-
-        Log.w("tag", "item clicked");
     }
 
     @Override
