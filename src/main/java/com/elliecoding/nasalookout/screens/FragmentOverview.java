@@ -50,7 +50,7 @@ public class FragmentOverview extends Fragment {
     private ContainerAdapter mAdapter = new ContainerAdapter(new ContainerClickListener() {
         @Override
         public void onContainerClicked(NasaData data) {
-            listener.onContainerClicked(data);
+            listener.onContainerClicked(data.getDate());
         }
     });
 
@@ -78,5 +78,13 @@ public class FragmentOverview extends Fragment {
             mPlaceholder.setVisibility(View.GONE);
         }
         mAdapter.addItem(data);
+    }
+
+    /**
+     * Triggers this fragment to instructs its {@link android.support.v7.widget.RecyclerView.Adapter} to remove all
+     * items currently visible on display
+     */
+    public void removeAllItems() {
+        mAdapter.removeAll();
     }
 }

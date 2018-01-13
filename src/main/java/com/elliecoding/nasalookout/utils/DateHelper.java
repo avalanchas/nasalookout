@@ -36,12 +36,34 @@ public class DateHelper {
     public static List<LocalDate> determinePastStartingDates(int numberOfMonths, LocalDate sourceDate) {
         List<LocalDate> result = new ArrayList<>();
 
-        // Subtract one day less than the number of days we currently have -> first of month
-        LocalDate date = sourceDate.minusDays(sourceDate.getDayOfMonth() - 1);
+        // Determine the first day of the month that we are currently in
+        LocalDate date = sourceDate.withDayOfMonth(1);
         result.add(date);
+
+        // Then get the rest of the months
         for (int count = 0; count < numberOfMonths - 1; count++) {
             date = date.minusMonths(1);
             result.add(date);
+        }
+        return result;
+    }
+
+    /**
+     * Returns a list of the dates in the month that is in the date passed as a parameter
+     *
+     * @param startingDate Any date of the month from which all days are to be retrieved
+     * @return A list of all days in the month that was part of the parameter
+     */
+    public static List<LocalDate> determineDaysOfMonth(LocalDate startingDate) {
+        List<LocalDate> result = new ArrayList<>();
+
+        // First we make absolutely sure that this is the first day of the mont
+        startingDate = startingDate.withDayOfMonth(1);
+        result.add(startingDate);
+
+        int days = startingDate.dayOfMonth().getMaximumValue();
+        for (int count = 2; count <= days; count++) {
+            result.add(startingDate.withDayOfMonth(count));
         }
         return result;
     }

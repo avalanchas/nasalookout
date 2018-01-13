@@ -134,7 +134,6 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
         // TODO add search and favourite
 
         return super.onOptionsItemSelected(item);
@@ -142,14 +141,26 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
 
     @Override
     public void onBackPressed() {
-
         // TODO when in detail go to overview, when in overview close app. When drawer open close drawer
         super.onBackPressed();
     }
 
     @Override
-    public void onContainerClicked(NasaData data) {
-        Intent startIntent = new Intent()
-        startActivity();
+    public void onContainerClicked(LocalDate startingDate) {
+        FragmentOverview overview = (FragmentOverview) getSupportFragmentManager().findFragmentByTag
+                (FRAGMENT_TAG_OVERVIEW);
+        overview.removeAllItems();
+
+        for (LocalDate date : DateHelper.determineDaysOfMonth(startingDate)) {
+            requestNasaData(date);
+        }
+    }
+
+    public void onNasaItemClicked(NasaData data) {
+
+        // We immediately go to the detail activity to show the image the user wants to see
+        Intent startIntent = new Intent(this, ActivityDetail.class);
+        startIntent.putExtra(KEY_EXTRA_DATA, data);
+        startActivity(startIntent);
     }
 }

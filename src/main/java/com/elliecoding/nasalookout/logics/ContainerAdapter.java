@@ -29,6 +29,16 @@ public class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.View
         mListener = listener;
     }
 
+    /**
+     * Removes all items of this adapter (and therefore the list) in a decently performance-efficient manner.
+     * However, do not call this method too often
+     */
+    public void removeAll() {
+        int size = values.size();
+        values.clear();
+        notifyItemRangeRemoved(0, size);
+    }
+
     protected class ViewHolder extends RecyclerView.ViewHolder {
         private View mlayout;
 
