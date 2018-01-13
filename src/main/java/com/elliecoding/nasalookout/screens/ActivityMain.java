@@ -9,34 +9,29 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.elliecoding.nasalookout.R;
 import com.elliecoding.nasalookout.entities.NasaData;
-import com.elliecoding.nasalookout.logics.ContainerAdapter;
-import com.elliecoding.nasalookout.logics.FragmentCallable;
+import com.elliecoding.nasalookout.logics.*;
 import com.elliecoding.nasalookout.utils.DateHelper;
-import com.elliecoding.nasalookout.utils.JsonParser;
 import org.joda.time.LocalDate;
 
-import java.util.List;
-
-public class ActivityMain extends AppCompatActivity implements FragmentCallable {
+public class ActivityMain extends AppCompatActivity implements FragmentEventListener, DataEventListener {
 
     private static final String LOG_TAG = ActivityMain.class.getSimpleName();
-    private static final String TAG_OVERVIEW = "overview";
 
+    private static final String FRAGMENT_TAG_OVERVIEW = "overview";
+    private static final String FRAGMENT_TAG_DETAIL = "detail";
+
+    // TODO make all resources screen flip safe
     private ActionBarDrawerToggle mDrawerToggle;
     private boolean mRequestHd;
+
+    private StorageDataManager mStorageDataManager = new StorageDataManager(this);
+    private InternetDataManager mInternetDataManager = new InternetDataManager(this);
+
+    private ContainerAdapter mAdapter = new ContainerAdapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +49,6 @@ public class ActivityMain extends AppCompatActivity implements FragmentCallable 
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
-
-        startInitialRequest();
     }
 
     private void initialiseOverview() {
@@ -66,16 +59,26 @@ public class ActivityMain extends AppCompatActivity implements FragmentCallable 
 
         RecyclerView.LayoutManager manager = new GridLayoutManager(this, 2);
         blockGrid.setLayoutManager(manager);
-        blockGrid.setAdapter(new ContainerAdapter());
+        blockGrid.setAdapter(mAdapter);
 
-        // The adapter is currently empty, initialise the first couple of blocks
-        retrieveDataContainers();
+        // The adapter is currently empty, invoke the retrieval of the first couple of blocks
+        for (LocalDate date : DateHelper.determinePastStartingDates(calculateNumberOfBlocks())) {
+            requestNasaData(date);
+        }
     }
 
-    private void retrieveDataContainers() {
-        for (LocalDate date : DateHelper.determineStartingDates(calculateNumberOfBlocks())) {
 
+    private void requestNasaData(LocalDate date) {
+        if (mStorageDataManager.hasInStorage(date)) {
+            mStorageDataManager.requestFromStorage(date);
+        } else {
+            mInternetDataManager.requestFromInternet(date);
         }
+    }
+
+    @Override
+    public void onDataRetrieved(NasaData data) {
+        mAdapter.addItem(data);
     }
 
     private int calculateNumberOfBlocks() {
@@ -105,56 +108,12 @@ public class ActivityMain extends AppCompatActivity implements FragmentCallable 
 
             // Add the fragment to the 'fragment_container' FrameLayout
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, firstFragment, TAG_OVERVIEW).commit();
+                    .add(R.id.fragment_container, firstFragment, FRAGMENT_TAG_OVERVIEW).commit();
         }
     }
 
-    private void startInitialRequest() {
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://api.nasa.gov/planetary/apod?api_key=ht3oMoWKS6pKVaHJGFQ7IjrzkFnleJ0wTP4Hr1TQ";
-
-        // Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-
-            @Override
-            public void onResponse(String response) {
-                startDetailedRequest(response);
-            }
-        }, new Response.ErrorListener() {
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.w(LOG_TAG, "Request failed, " + error.getMessage());
-            }
-        });
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
-    }
-
-    private void startDetailedRequest(String response) {
-        NasaData data = JsonParser.parseResponse(response);
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = data.getUrl();
-
-        // Request a string response from the provided URL.
-        ImageRequest stringRequest = new ImageRequest(url, new Response.Listener<Bitmap>() {
-            @Override
-            public void onResponse(Bitmap response) {
-                sendResponseToGallery(response);
-            }
-        }, 1024, 1024, ImageView.ScaleType.CENTER, null, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.w(LOG_TAG, "Request failed, " + error.getMessage());
-            }
-        });
-        // Add the request to the RequestQueue.
-        queue.add(stringRequest);
-    }
-
     private void sendResponseToGallery(Bitmap image) {
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_OVERVIEW);
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG_OVERVIEW);
         if (fragment != null && fragment instanceof FragmentOverview) {
             ((FragmentOverview) fragment).displayImage(image);
         }

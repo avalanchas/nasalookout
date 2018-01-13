@@ -5,7 +5,7 @@ package com.elliecoding.nasalookout.logics;
  * specific callback methods that any activity that wishes to attach to the respective fragment has to implement. Note:
  * the fragment itself is responsible for checking whether a callback is possible
  */
-public interface FragmentCallable {
+public interface FragmentEventListener {
 
     void onFavouriteClicked(String id);
 }

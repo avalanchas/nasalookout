@@ -9,21 +9,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.elliecoding.nasalookout.R;
-import com.elliecoding.nasalookout.logics.FragmentCallable;
+import com.elliecoding.nasalookout.logics.FragmentEventListener;
 
 public class FragmentDetail extends Fragment {
 
-    private FragmentCallable listener;
+    private FragmentEventListener listener;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof FragmentCallable) {
-            listener = (FragmentCallable) context;
+        if (context instanceof FragmentEventListener) {
+            listener = (FragmentEventListener) context;
         } else {
             throw new IllegalStateException("A context that wishes to attach to this fragment must implement " +
-                    FragmentCallable.class.getName());
+                    FragmentEventListener.class.getName());
         }
     }
 

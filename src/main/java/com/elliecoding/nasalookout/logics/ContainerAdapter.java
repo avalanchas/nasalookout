@@ -1,6 +1,7 @@
 package com.elliecoding.nasalookout.logics;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +19,8 @@ public class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.View
 
     protected class ViewHolder extends RecyclerView.ViewHolder {
         private View layout;
-        private TextView coverImage;
-        private ImageView coverText;
+        private ImageView coverImage;
+        private TextView coverText;
 
         protected ViewHolder(View layout) {
             super(layout);
@@ -29,37 +30,44 @@ public class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.View
         }
     }
 
-    public void add(int position, String item) {
+    public void addItems(List<NasaData> items) {
+        values.addAll(items);
+        notifyDataSetChanged();
+    }
+
+    public void addItem(NasaData item) {
+        addItem(getItemCount(), item);
+    }
+
+    public void addItem(int position, NasaData item) {
         values.add(position, item);
         notifyItemInserted(position);
     }
 
-    // Create new views (invoked by the layout manager)
     @Override
     public ContainerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        // create a new view
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View v = inflater.inflate(R.layout.row_layout, parent, false);
-        // set the view's size, margins, paddings and layout parameters
-        ViewHolder vh = new ViewHolder(v);
-        return vh;
+        View layout = inflater.inflate(R.layout.block_cover, parent, false);
+        return new ViewHolder(layout);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
-        final String name = values.get(position);
-        holder.coverImage.setText(name);
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        final NasaData data = values.get(position);
+
+        holder.coverText.setText(data.getDate());
+        holder.coverImage.setImageBitmap(data.getImage());
         holder.coverImage.setOnClickListener(new View.OnClickListener() {
+
             @Override
-            public void onClick(View v) {
-                remove(position);
+            public void onClick(View view) {
+                openItem(holder.getAdapterPosition(), view);
             }
         });
+    }
 
-        holder.coverText.setText("Footer: " + name);
+    private void openItem(int position, View view) {
+        Log.w("tag", "item clicked");
     }
 
     @Override
