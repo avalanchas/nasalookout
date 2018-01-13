@@ -27,8 +27,16 @@ public class StorageDataManager {
         }
     }
 
-    public boolean hasInStorage(Context context, LocalDate date) {
-        return new File(context.getFilesDir(), date.getYear() + "/" + date.getMonthOfYear() + "/" + date.getDayOfMonth
+    /**
+     * Determines whether the Nasa Data information for the specified date exists as a file in the Android internal
+     * storage directory. This does <b>not</b> guarantee that the file is intact, complete, accessible, writable or
+     * other. It also doe
+     *
+     * @param date The date for which to check the storage
+     * @return true if the file exists, false otherwise
+     */
+    public boolean hasInStorage(LocalDate date) {
+        return new File(mContext.getFilesDir(), date.getYear() + "/" + date.getMonthOfYear() + "/" + date.getDayOfMonth
                 ()).exists();
     }
 
@@ -36,7 +44,7 @@ public class StorageDataManager {
         new FileReaderTask().execute(date);
     }
 
-    public void writeToStorage(Context context, NasaData data) {
+    public void writeToStorage(NasaData data) {
         new FileWriterTask().execute(data);
     }
 
