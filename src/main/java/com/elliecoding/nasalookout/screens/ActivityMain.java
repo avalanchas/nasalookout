@@ -187,7 +187,7 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
         // A month should already have all its items, so we only react if we currently show the initial overview
         if (mCurrentViewState == ViewState.YEAR) {
             for (LocalDate date : DateHelper.determinePastStartingDates(4, data.getDate())) {
-                requestNasaData(date, true);
+                // requestNasaData(date, true);
             }
         }
     }
