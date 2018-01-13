@@ -18,13 +18,11 @@ public class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.View
     private List<NasaData> values = new ArrayList<>();
 
     protected class ViewHolder extends RecyclerView.ViewHolder {
-        private View layout;
         private ImageView coverImage;
         private TextView coverText;
 
         protected ViewHolder(View layout) {
             super(layout);
-            this.layout = layout;
             coverImage = layout.findViewById(R.id.cover_image);
             coverText = layout.findViewById(R.id.cover_text);
         }
@@ -39,7 +37,7 @@ public class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.View
         addItem(getItemCount(), item);
     }
 
-    public void addItem(int position, NasaData item) {
+    private void addItem(int position, NasaData item) {
         values.add(position, item);
         notifyItemInserted(position);
     }
@@ -55,7 +53,7 @@ public class ContainerAdapter extends RecyclerView.Adapter<ContainerAdapter.View
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final NasaData data = values.get(position);
 
-        holder.coverText.setText(data.getDate());
+        holder.coverText.setText(data.getDate().toString());
         holder.coverImage.setImageBitmap(data.getImage());
         holder.coverImage.setOnClickListener(new View.OnClickListener() {
 

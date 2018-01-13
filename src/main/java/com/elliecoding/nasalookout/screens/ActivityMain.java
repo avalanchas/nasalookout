@@ -7,8 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import com.elliecoding.nasalookout.R;
@@ -31,8 +29,6 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
     private StorageDataManager mStorageDataManager = new StorageDataManager(this);
     private InternetDataManager mInternetDataManager = new InternetDataManager(this);
 
-    private ContainerAdapter mAdapter = new ContainerAdapter();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,19 +48,14 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
     }
 
     private void initialiseOverview() {
-        RecyclerView blockGrid = findViewById(R.id.block_container);
-
-        // We know the layout will not change, supposed to increase performance
-        blockGrid.setHasFixedSize(true);
-
-        RecyclerView.LayoutManager manager = new GridLayoutManager(this, 2);
-        blockGrid.setLayoutManager(manager);
-        blockGrid.setAdapter(mAdapter);
-
-        // The adapter is currently empty, invoke the retrieval of the first couple of blocks
         for (LocalDate date : DateHelper.determinePastStartingDates(calculateNumberOfBlocks())) {
             requestNasaData(date);
         }
+    }
+
+    private int calculateNumberOfBlocks() {
+        // TODO check how many boxes we need to fill the screen according to screen size
+        return 6;
     }
 
 
@@ -78,14 +69,16 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
 
     @Override
     public void onDataRetrieved(NasaData data) {
-        mAdapter.addItem(data);
+       sendResponseToGallery(data);
     }
 
-    private int calculateNumberOfBlocks() {
-        // TODO check how many boxes we need to fill the screen according to screen size
-        return 6;
-    }
 
+    private void sendResponseToGallery(NasaData image) {
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG_OVERVIEW);
+        if (fragment != null && fragment instanceof FragmentOverview) {
+            ((FragmentOverview) fragment).addDataToOverview(image);
+        }
+    }
 
     private void initialiseFragments(Bundle savedInstanceState) {
         // Check that the activity is using the layout version with
@@ -112,16 +105,9 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
         }
     }
 
-    private void sendResponseToGallery(Bitmap image) {
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG_OVERVIEW);
-        if (fragment != null && fragment instanceof FragmentOverview) {
-            ((FragmentOverview) fragment).displayImage(image);
-        }
-    }
-
     private void initialiseDrawer() {
-        DrawerLayout mDrawerLayout = findViewById(R.id.drawer_layout);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.drawer_open, R.string.drawer_close) {
 
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
@@ -131,8 +117,7 @@ public class ActivityMain extends AppCompatActivity implements FragmentEventList
                 super.onDrawerOpened(drawerView);
             }
         };
-
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        drawerLayout.addDrawerListener(mDrawerToggle);
     }
 
     @Override

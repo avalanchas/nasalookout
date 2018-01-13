@@ -1,6 +1,7 @@
 package com.elliecoding.nasalookout.entities;
 
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import com.google.gson.annotations.SerializedName;
 import org.joda.time.LocalDate;
 
@@ -10,7 +11,7 @@ import org.joda.time.LocalDate;
  *
  * @see <a href=https://api.nasa.gov/index.html>APOD API</a>
  */
-public class NasaData {
+public class NasaData implements Comparable<LocalDate> {
 
     private final String copyright;
     private final LocalDate date;
@@ -74,5 +75,10 @@ public class NasaData {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    @Override
+    public int compareTo(@NonNull LocalDate other) {
+        return date.compareTo(other);
     }
 }
